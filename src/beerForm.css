@@ -1,0 +1,9 @@
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form input,
+form textarea {
+    display: block;
+}

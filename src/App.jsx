@@ -1,34 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import Skeleton from "react-loading-skeleton";
+import Navbar from "./components/Navbar";
+import Home from "./components/Home";
+import AllBeers from "./components/AllBeers";
+import RandomBeer from "./components/RandomBeer";
+import BeerDetails from "./components/BeerDetails";
+import NewBeerForm from "./components/NewBeerForm";
+import axios from "axios";
+const apiURL = "https://ih-beers-api2.herokuapp.com/beers";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [beers, setBeers] = useState([]);
+  const [fetching, setFetching] = useState(true);
+
+  const fetchBeers = async () => {
+    try {
+      const response = await axios.get(apiURL);
+      setBeers(response.data);
+      setFetching(false);
+    } catch (error) {
+      console.log("There was an error fetching the data: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBeers();
+  }, []);
 
   return (
     <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Navbar />
+      {fetching && (
+        <>
+          <Skeleton />
+        </>
+      )}
+      {!fetching && (
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/beers" element={<AllBeers beers={beers} setBeers={setBeers} />} />
+          <Route path="/beers/:beerID" element={<BeerDetails beers={beers} />} />
+          <Route path="/random-beer" element={<RandomBeer />} />
+          <Route path="/add-beer" element={<NewBeerForm />} />
+          <Route path="*" element={<h1>404 Not Found</h1>} />
+        </Routes>
+      )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
